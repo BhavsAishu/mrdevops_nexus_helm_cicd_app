@@ -2,6 +2,10 @@ pipeline{
     
     agent any 
     
+      environment {
+      
+          VERSION = "${env.BUILD_ID}"
+      }
     stages {
         
         stage('Git Checkout'){
@@ -43,6 +47,34 @@ pipeline{
                     sh 'mvn clean install'
                 }
             }
+        }
+
+        stage("docker build & push") {
+        
+           steps{
+
+             script{
+
+             withCredentials([string(credentialsId: 'nexus-cred', variable: 'nexus-cred')]) {
+
+                 sh '''
+              
+               docker build -t 43.205.194.172:8083/springapp:${VERSION} .
+
+               docker login -u admin -p nexus-cred 43.205.194.172:8083
+
+               docker push 43.205.194.172:8083/springapp:${VERSION}
+
+               docker rmi 43.205.194.172:8083/springapp:${VERSION}
+
+             '''
+    
+            }
+             
+             }
+
+           }
+        
         }
       
       }
