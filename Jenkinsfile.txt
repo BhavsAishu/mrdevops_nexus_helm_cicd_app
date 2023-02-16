@@ -1,35 +1,48 @@
-pipeline {
-
-      agent any
-
-      stages {
-      
-        stage("sonarqube quality check"){
-
-           agent{
-              
-                docker{
+pipeline{
+    
+    agent any 
+    
+    stages {
+        
+        stage('Git Checkout'){
+            
+            steps{
                 
-                 image 'maven'
-                
+                script{
+                    
+                    git branch: 'main', url: 'https://github.com/BhavsAishu/mrdevops_nexus_helm_cicd_app.git'
                 }
-              
-              }
-        
-           steps{
-
-              script{
-
-                 withCredentials([string(credentialsId: 'jenkins-sonar', variable: 'jenkins-sonar')]) {
-                         sh 'mvn clean package sonar:sonar'
-   
-                 }
-           
-             }
+            }
+        }
+        stage('UNIT testing'){
+            
+            steps{
                 
-          
-           }
-        
+                script{
+                    
+                    sh 'mvn test'
+                }
+            }
+        }
+        stage('Integration testing'){
+            
+            steps{
+                
+                script{
+                    
+                    sh 'mvn verify -DskipUnitTests'
+                }
+            }
+        }
+        stage('Maven build'){
+            
+            steps{
+                
+                script{
+                    
+                    sh 'mvn clean install'
+                }
+            }
         }
       
       }
